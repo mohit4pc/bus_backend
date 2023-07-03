@@ -8,10 +8,9 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
     token = req?.headers.authorization?.split(" ")[1];
     try {
       if (token) {
-        const decoded = jwt.verify(token, process.env.JWT);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const user = await User.findById(decoded?.id);
         req.user = user;
-        // console.log(req);
         next();
       }
     } catch (error) {
@@ -23,17 +22,17 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
 });
 const isAdmin = asyncHandler(async (req, res, next) => {
   //   console.log(req);
-  const { mobile } = req.user;
-  const isAdmin = await User.findOne({ mobile: mobile });
-  if (isAdmin.roles !== "admin") {
-    throw new Error("You are not an Admin.");
+  const { email } = req.user;
+  const isAdmin = await User.findOne({ email: email });
+  if (isAdmin.roles !== "donor") {
+    throw new Error("You are not an donor.");
   } else {
     next();
   }
 });
 const isInstructor = asyncHandler(async (req, res, next) => {
-  const { mobile } = req.user;
-  const isInstructor = await User.findOne({ mobile: mobile });
+  const { email } = req.user;
+  const isInstructor = await User.findOne({ email: email });
   if (isInstructor.roles !== "instructor") {
     throw new Error("You are not an Instructor.");
   } else {

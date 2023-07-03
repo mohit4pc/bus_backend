@@ -3,8 +3,8 @@ const asyncHandler = require("express-async-handler");
 const { generateToken } = require("../config/jwtToken");
 const validateMongodbId = require("../config/validateMongoDbID");
 const registerAUser = asyncHandler(async (req, res) => {
-  const mobile = req.body.mobile;
-  const findUser = await User.findOne({ mobile: mobile });
+  const email = req.body.email;
+  const findUser = await User.findOne({ email: email });
   if (!findUser) {
     const createUser = await User.create(req.body);
     res.status(200).json({
@@ -17,8 +17,8 @@ const registerAUser = asyncHandler(async (req, res) => {
 });
 
 const loginUser = asyncHandler(async (req, res) => {
-  const { mobile, password } = req.body;
-  const findUser = await User.findOne({ mobile: mobile });
+  const { email, password } = req.body;
+  const findUser = await User.findOne({ email: email });
   if (findUser && (await findUser.isPasswordMatched(password))) {
     res.status(200).json({
       status: true,
@@ -31,10 +31,16 @@ const loginUser = asyncHandler(async (req, res) => {
 const getAllUser = asyncHandler(async (req, res) => {
   try {
     const alluser = await User.find();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 1;
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    const users = [alluser];
+    const paginatedUsers = users.slice(startIndex, endIndex);
     res.status(200).json({
       status: true,
-      message: "All User Fetched Successfully",
-      alluser,
+      message: "All Donor Fetched Successfully",
+      paginatedUsers,
     });
   } catch (error) {
     throw new Error(error);
